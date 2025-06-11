@@ -1,6 +1,6 @@
 import {useState} from 'react';
 
-const STATUS = { // Des trucs
+const STATUS = {
   HOVERED: 'hovered',
   NORMAL: 'normal',
 };
@@ -8,7 +8,7 @@ const STATUS = { // Des trucs
 export default function Link({page, children}) {
   const [status, setStatus] = useState(STATUS.NORMAL);
 
-  const onMouseEnter = () => { // Encore des trucs
+  const onMouseEnter = () => {
     setStatus(STATUS.HOVERED);
   };
 
@@ -16,7 +16,7 @@ export default function Link({page, children}) {
     setStatus(STATUS.NORMAL);
   };
 
-  return ( // Toujours des trucs
+  return (
     <a
       className={status}
       href={page || '#'}
