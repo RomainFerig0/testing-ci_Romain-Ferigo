@@ -1,43 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .product-list, .shopping-cart {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .product, .cart-item {
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 200px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .product img, .cart-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .product h3, .cart-item h3 {
+      font-size: 18px;
+      color: #333;
+    }
+    .product p {
+      font-size: 16px;
+      color: #555;
+    }
+    .cart-item p {
+      font-size: 14px;
+      color: #777;
+    }
+    .button {
+      background-color: #28a745;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .remove-button {
+      background-color: #dc3545;
+    }
+    .form-input {
+      margin: 10px 0;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 200px;
+    }
+    .form-submit {
+      background-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .cart-summary {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #fff;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
+  <div class="container">
+    <h1>Simple Shopping Cart</h1>
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <div>
+      <h2>Add New Item to Shop</h2>
+      <input id="new-item-name" class="form-input" type="text" placeholder="Item Name">
+      <input id="new-item-price" class="form-input" type="number" placeholder="Item Price" min="0">
+      <button class="form-submit" onclick="addNewItem()">Add Item</button>
+    </div>
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
-  </body>
+    <div>
+      <h2>Shop Products</h2>
+      <div class="product-list" id="product-list">
+        <!-- Dynamic product list will be rendered here -->
+      </div>
+    </div>
+
+    <div>
+      <h2>Shopping Cart</h2>
+      <div class="shopping-cart" id="shopping-cart">
+        <!-- Dynamic cart items will be rendered here -->
+      </div>
+      <div class="cart-summary">
+        <h3>Total: $<span id="cart-total">0.00</span></h3>
+        <button class="button" onclick="checkout()">Checkout</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const products = [];
+    const cart = [];
+
+    // Function to render products
+    function renderProducts() {
+      const productList = document.getElementById("product-list");
+      productList.innerHTML = "";
+      products.forEach((product, index) => {
+        const productDiv = document.createElement("div");
+        productDiv.className = "product";
+        productDiv.innerHTML = `
+          <img src="https://via.placeholder.com/150" alt="${product.name}">
+          <h3>${product.name}</h3>
+          <p>$${product.price}</p>
+          <button class="button" onclick="addToCart(${index})">Add to Cart</button>
+        `;
+        productList.appendChild(productDiv);
+      });
+    }
+
+    // Function to render shopping cart
+    function renderCart() {
+      const shoppingCart = document.getElementById("shopping-cart");
+      shoppingCart.innerHTML = "";
+      cart.forEach((item, index) => {
+        const cartItemDiv = document.createElement("div");
+        cartItemDiv.className = "cart-item";
+        cartItemDiv.innerHTML = `
+          <img src="https://via.placeholder.com/150" alt="${item.name}">
+          <h3>${item.name}</h3>
+          <p>Price: $${item.price}</p>
+          <button class="button remove-button" onclick="removeFromCart(${index})">Remove</button>
+        `;
+        shoppingCart.appendChild(cartItemDiv);
+      });
+      updateCartTotal();
+    }
+
+    // Function to update cart total
+    function updateCartTotal() {
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById("cart-total").textContent = total.toFixed(2);
+    }
+
+    // Function to add item to shopping cart
+    function addToCart(productIndex) {
+      const product = products[productIndex];
+      cart.push(product);
+      renderCart();
+    }
+
+    // Function to remove item from shopping cart
+    function removeFromCart(cartIndex) {
+      cart.splice(cartIndex, 1);
+      renderCart();
+    }
+
+    // Function to checkout
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+      } else {
+        alert("Thank you for your purchase!");
+        cart.length = 0;
+        renderCart();
+      }
+    }
+
+    // Function to add a new item to the shop
+    function addNewItem() {
+      const name = document.getElementById("new-item-name").value;
+      const price = parseFloat(document.getElementById("new-item-price").value);
+
+      if (!name || isNaN(price) || price <= 0) {
+        alert("Please provide valid item details.");
+        return;
+      }
+
+      const newItem = { name, price };
+      products.push(newItem);
+      renderProducts();
+      document.getElementById("new-item-name").value = "";
+      document.getElementById("new-item-price").value = "";
+    }
+
+    // Initial render of products
+    renderProducts();
+  </script>
+
+</body>
 </html>
